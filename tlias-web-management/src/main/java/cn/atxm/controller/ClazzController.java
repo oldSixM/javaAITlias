@@ -46,6 +46,7 @@ public class ClazzController {
     @Log
     @DeleteMapping("/{id}")
     public Result delete(@PathVariable Integer id){
+        log.info("根据id删除班级信息，id：{}",id);
         clazzService.delete(id);
         return Result.success();
     }
