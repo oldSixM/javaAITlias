@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.atxm.mapper.ClazzMapper">
+    <insert id="insert">
+        INSERT INTO clazz(name,room,begin_date,end_date,master_id,subject,create_time,update_time)
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">
+                #{name},
+            </if>
+            <if test="room != null">
+                #{room},
+            </if>
+            <if test="beginDate != null">
+                #{beginDate},
+            </if>
+            <if test="endDate != null">
+                #{endDate},
+            </if>
+            <if test="masterId != null">
+                #{masterId},
+            </if>
+            <if test="subject != null">
+                #{subject},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update">
+        UPDATE clazz
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="room != null">
+                room = #{room},
+            </if>
+            <if test="beginDate != null">
+                begin_date = #{beginDate},
+            </if>
+            <if test="endDate != null">
+                end_date = #{endDate},
+            </if>
+            <if test="masterId != null">
+                master_id = #{masterId},
+            </if>
+            <if test="subject != null">
+                subject = #{subject},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <select id="list" resultType="cn.atxm.pojo.Clazz">
+        SELECT
+            c.id,
+            c.name,
+            c.room,
+            c.begin_date,
+            c.end_date,
+            c.master_id,
+            e.name AS masterName,
+            c.create_time,
+            c.update_time,
+            CASE
+                WHEN NOW() &gt; c.end_date THEN '已结课'
+                WHEN NOW() &lt; c.begin_date THEN '未开课'
+                ELSE '进行中'
+            END AS status
+        FROM clazz c
+        LEFT JOIN emp e ON c.master_id = e.id
+        <where>
+            <if test="name!=null and name!=''">
+                and c.name like concat('%',#{name},'%')
+            </if>
+            <if test="begin!=null">
+                and c.begin_date &gt;= #{begin}
+            </if>
+            <if test="end!=null">
+                and c.end_date &lt;= #{end}
+            </if>
+        </where>
+        ORDER BY c.update_time DESC
+    </select>
+    <select id="getStudentCountData" resultType="java.util.Map">
+        select c.name pos,count(*) num from clazz c left join student s on c.id = s.clazz_id group by pos order by num
+    </select>
+</mapper>
